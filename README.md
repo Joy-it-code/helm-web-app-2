@@ -1,4 +1,4 @@
-# 🚀 Helm Chart Customization Project
+# 🚀 Helm Chart Customization
 
 This project demonstrates how to deploy a simple web application to a Kubernetes cluster using **Helm**, a powerful package manager for Kubernetes. It includes the setup of Helm, customization of a Helm chart, and deployment of the application.
 
@@ -53,7 +53,7 @@ cd helm-web-app
 
 ---
 
-## 1: 🛠️ Create a Helm Chart
+## Step 1: 🛠️ Create a Helm Chart
 ```
 helm create webapp
 ```
@@ -62,7 +62,7 @@ helm create webapp
 ---
 
 
-## 2: Modify values.yaml
+## 1.2 : Modify values.yaml
 Edit **values.yaml** and update the following values:
 ```
 replicaCount: 2
@@ -74,7 +74,7 @@ image:
 ```
 
 
-3. Customize the Deployment Template
+## 1.3: Customize the Deployment Template
 Open templates/deployment.yaml and find this line:
 ```
 {{- toYaml .Values.resources | nindent 12 }}
@@ -97,7 +97,7 @@ resources:
 helm-web-app-2
 ```
 
-## 3: Initialize Git:
+## 1.4: Initialize Git:
 ```
 git init
 git add .gitignore
@@ -114,5 +114,61 @@ git push -u origin master
 ---
 
 
+## Step 2: Install the Chart in Kubernetes
+Make sure you're in the root directory (helm-web-app), then run:
+```
+minikube start --driver=virtualbox
+minikube status
+helm install my-webapp ./webapp
+```
+![](./img/3a.helm.install.png)
+
+
+## Verify the Deployment
+```
+kubectl get deployments
+```
+**You should see my-webapp running with 2 replicas.**
+![](./img/3b.kube.get.png)
+
+
+
+## Get the Application URL
+
+Run the following commands to find pod and port info:
+```
+export POD_NAME=$(kubectl get pods --namespace default -l "app.kubernetes.io/name=webapp,app.kubernetes.io/instance=my-webapp" -o jsonpath="{.items[0].metadata.name}")
+
+export CONTAINER_PORT=$(kubectl get pod --namespace default $POD_NAME -o jsonpath="{.spec.containers[0].ports[0].containerPort}")
+```
+
+## Forward the Port: 
+
+Use kubectl port-forward to access your application locally:
+```
+kubectl port-forward $POD_NAME 8081:80
+```
+![](./img/4a.port.forward.png)
+
+## open your browser and go to:
+
+```
+http://127.0.0.1:8081
+```
+![](./img/4b.on.browser.png)
+
+---
+
+
+### Push to GitHub
+```
+git add .
+git commit -m "update file"
+git push origin master
+```
+
 ## ✅ Conclusion
+
 This project shows how Helm can simplify Kubernetes application deployments through templated configuration and version-controlled charts. Helm does not only helps maintain consistency across environments but also empowers teams to deploy and manage applications at scale with confidence.
+
+
